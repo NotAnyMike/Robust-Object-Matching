@@ -71,7 +71,52 @@ title('image2');
 %project one image to another, which can build a panorama stitch 
 
 
+function transform_matrix = ransac_loop_affine(match_point1,match_point2,loop_num)
+    [num, ~] =size(match_point1);
 
+    k = floor(num*0.4);
+    con = 0;
+    
+    point1_hold = [];
+    point2_hold = [];
+
+    for i = 1:loop_num
+        index = randsample(num,k);
+        point1_rs = match_point1(index,:);
+        point2_rs = match_point2(index,:);
+
+        A = [point1_rs,ones(k,1)];
+        matrix_tr = A \ point2_rs;
+
+        point1_tr =  [point1_rs,ones(k,1)] * matrix_tr;
+        distance=sum((point1_tr-point2_rs).^2,2);
+        threshould = mean(distance);
+        [num_d,~] = size(distance(distance< threshould));
+        con_tmp = num_d;
+        if con_tmp ==0
+            continue;
+        end
+
+        if i == 1
+           con = con_tmp;
+           index_hold = find(distance<threshould);
+           point1_hold = point1_rs(index_hold,:);
+           point2_hold = point2_rs(index_hold,:);
+        end
+
+        if con < con_tmp 
+           con = con_tmp;
+           index_hold = find(distance<threshould);
+           point1_hold = point1_rs(index_hold,:);
+           point2_hold = point2_rs(index_hold,:);
+        end
+        
+    end
+    
+    [index_x,~] = size(point1_hold);
+    A_matrix = [point1_hold,ones(index_x,1)];
+    transform_matrix = A_matrix \ point2_hold;
+end
 
 
 

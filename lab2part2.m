@@ -48,9 +48,49 @@ clist='rgbcmykrgbcmykrgbcmyk'; %Illustrate matches with the first 21 points
 k=1;i=1;
 while(i<numel(matchlist)&&k<21)
     if(matchlist(i)<1), i=i+1; continue; end
+    key_point1(i,:)
+    matchlist(i)
     figure(3); plot(key_point1(i,1),key_point1(matchlist(i),2),[clist(k),'*']);
     figure(4); plot(key_point2(i,1),key_point2(matchlist(i),2),[clist(k),'*']); 
     k=k+1;i=i+1;
 end
 
 
+function aparence = extractDescrAppearance(img, keys)
+    N = 1;
+    [key_x,key_y] = size(keys);
+    aparence = -1*ones(key_x,(2*N+1)^2);
+    for i=1:size(keys)
+        x = keys(i,1);
+        y = keys(i,2);
+        % Build the mini vector
+        flatten = reshape(img(x-N:x+N,y-N:y+N),1,[]);
+        aparence(i,:) = flatten ;
+    end
+end
+
+function desc = extractDescrGradient(img, keys)
+    N = 1;
+    Bins = [1:10]*255.5;
+    [key_x,key_y] = size(keys);
+    desc = -1*ones(key_x,10);
+    [Gmag,~] = imgradient(img);
+    for i=1:size(keys)
+        x = keys(i,1);
+        y = keys(i,2);
+        % Build the mini vector
+        desc(i,:) = histc(reshape(Gmag(x-N:x+N,y-N:y+N),1,[]),Bins);
+    end
+end
+
+function mlist = matchDescrs(descrs1, descrs2)
+    thresh = 5;
+    D = pdist2(descrs1, descrs2);
+    for i = 1 : size(D,1)
+        if(min(D(i,:))>thresh)
+            mlist(i)=-1;
+        else
+            [~,mlist(i)]=min(D(i,:));
+        end
+    end
+end
