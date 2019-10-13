@@ -1,3 +1,3 @@
 # Keypoint Detector and (Robust) Object Matching
 
-This lab is to implement different models, for Keypoint Detectors we will implement Harries, for Object Matching a basic algorithm and for Robost Object Matching we will implement RANSAC based on pre-defined MatLab methods.
+Here it is an implementation for different models. For Keypoint Detectors: Harris. For Object Matching a basic algorithm based on BOW and for Robust Object Matching we will implement RANSAC.
